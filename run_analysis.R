@@ -1,10 +1,10 @@
-# Download the unzipped file first and save the zipped file to local document
+#1 Download the unzipped file first and save the zipped file to local document
 download.file("https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip","dataset.zip")
 
 # library to be used:
 library(dplyr)
 
-## Create set:
+#2 Create set:
 # Train set
 xtrain<-read.table('./UCI HAR Dataset/train/X_train.txt', header=FALSE)
 ytrain<-read.table('./UCI HAR Dataset/train/y_train.txt', header=FALSE)
@@ -31,7 +31,7 @@ colnames(xtest)<-featrasp
 # rename activity columns to id and actions(walk,lay,etc.)
 colnames(activity)<-c('id','actions')
 
-# Merging train and test
+#3 Merging the different dataset together
 ## X train
 mergeX<-rbind(xtrain, xtest)
 
@@ -48,7 +48,7 @@ dfxy<-cbind(mergeY,mergeX, mergeSubj)
 #Merging previous dataset with the activity
 dfactivity<-merge(dfxy, activity,by.x = 'V1',by.y = 'id')
 
-# Mean and standard deviation
+#4 Getting Mean and Standard deviation
 colNames<-colnames(dfactivity)
 dffinal<-dfactivity%>%
   select(actions, subjectID, grep("\\bmean\\b|\\bstd\\b",colNames))
@@ -56,7 +56,7 @@ dffinal<-dfactivity%>%
 # Transform activity to a factor variable 
 dffinal$actions<-as.factor(dffinal$actions)
 
-# Use descriptive activity names to name the activities in the data set
+#5 Rename the variables
 colnames(dffinal)<-gsub("^t", "time", colnames(dffinal))
 colnames(dffinal)<-gsub("^f", "frequency", colnames(dffinal))
 colnames(dffinal)<-gsub("Acc", "Accelerometer", colnames(dffinal))
@@ -64,8 +64,8 @@ colnames(dffinal)<-gsub("Gyro", "Gyroscope", colnames(dffinal))
 colnames(dffinal)<-gsub("Mag", "Magnitude", colnames(dffinal))
 colnames(dffinal)<-gsub("BodyBody", "Body", colnames(dffinal))
 
-# Creates a second data set with the average of each variable for activity and subject.
+#6 Create a second data set with the average of each variable for activity and subject
 dffinal.2<-aggregate(. ~subjectID + actions, dffinal, mean)
 
-# text file for final output
+#7 Create the final txt file
 write.table(dffinal.2, file = "tidydata.txt",row.name=FALSE)
